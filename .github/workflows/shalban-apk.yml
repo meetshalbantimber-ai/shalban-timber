@@ -1,0 +1,46 @@
+name: Build SHALBAN SMART APK
+
+on:
+  push:
+    branches: [ main, master, shalban-timber ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Regenerate clean Android & iOS configs
+        run: |
+          rm -rf android ios
+          flutter create . --org com.shalbantimber --project-name shalban_smart --platforms=android,ios
+          sed -i 's/android:label="[^"]*"/android:label="SHALBAN SMART"/' android/app/src/main/AndroidManifest.xml
+          sed -i 's/<application/<uses-permission android:name="android.permission.CAMERA"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
+
+      - name: Install dependencies and patch ProGuard
+        run: |
+          flutter pub get
+          find ~/.pub-cache -name "build.gradle" -exec sed -i 's/proguard-android.txt/proguard-android-optimize.txt/g' {} +
+
+      - name: Build Release APK
+        run: flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SHALBAN-SMART-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk

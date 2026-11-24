@@ -84,16 +84,6 @@ class _WebViewScreenState extends State<WebViewScreen>
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        CookieManager.instance().flush();
-      }
-    }
-  }
-
   Future<void> _requestMediaPermissions() async {
     // Request camera permission so WebView file chooser can offer live camera
     // capture for custom furniture and wooden door order photos.
@@ -322,9 +312,6 @@ class _WebViewScreenState extends State<WebViewScreen>
                   },
                   onLoadStop: (controller, url) async {
                     _pullToRefreshController.endRefreshing();
-                    if (defaultTargetPlatform == TargetPlatform.android) {
-                      await CookieManager.instance().flush();
-                    }
                     if (!mounted) return;
                     setState(() {
                       _progress = 1.0;

@@ -24,11 +24,18 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Regenerate clean Android & iOS configs
+        run: |
+          rm -rf android ios
+          flutter create . --org com.shalbantimber --project-name shalban_smart --platforms=android,ios
+          sed -i 's/android:label="[^"]*"/android:label="SHALBAN SMART"/' android/app/src/main/AndroidManifest.xml
+          sed -i 's/<application/<uses-permission android:name="android.permission.CAMERA"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
+
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build Release APK
-        run: flutter build apk --release --android-skip-build-dependency-validation
+        run: flutter build apk --release
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

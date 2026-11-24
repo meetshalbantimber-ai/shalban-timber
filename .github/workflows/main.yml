@@ -33,7 +33,8 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
-
+      - name: Allow legacy proguard file
+        run: printf "\nandroid.r8.proguardAndroidTxt.disallowed=false\n" >> android/gradle.properties
       - name: Build Release APK
         run: flutter build apk --release
 
